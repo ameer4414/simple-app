@@ -15,7 +15,7 @@ spec:
       containers:
       - name: simple-app
         # The DOCKER_IMAGE_TAG placeholder will be replaced by Jenkins
-        image: 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo
+        image: 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo:simple-app-34
         ports:
         - containerPort: 3000
 ---
