@@ -27,7 +27,7 @@ pipeline {
                     def image_tag = "${ecr_repo_url}:${env.BUILD_ID}"
 
                     // Log in to ECR with the credentials from the AWS CLI
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'Jenkins-demo-aws-credentials']]) {
                         sh "aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${ecr_repo_url}"
                     }
 
