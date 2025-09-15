@@ -5,7 +5,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "/usr/local/bin/docker build -t simple-app:latest ."
+                    sh "/usr/local/bin/docker build --platform linux/amd64 -t simple-app:latest ."                
                 }
             }
         }
