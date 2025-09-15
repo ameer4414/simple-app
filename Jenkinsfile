@@ -5,7 +5,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "/usr/local/bin/docker build -t simple-app:${env.BUILD_ID} ."
+                    sh "/usr/local/bin/docker build -t simple-app:latest ."
                 }
             }
         }
