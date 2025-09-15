@@ -48,10 +48,10 @@ pipeline {
                     // This block ensures both aws and kubectl are found
                     withEnv(['PATH+EXTRA=/usr/local/bin:/opt/homebrew/bin']) {
                         // Update the Kubernetes manifest file with the full ECR URL
-                        sh "sed -i '' 's|DOCKER_IMAGE_TAG|${full_image_tag_for_k8s}|g' simple-app/k8s-deployment.yml"
+                        sh "sed -i '' 's|DOCKER_IMAGE_TAG|${full_image_tag_for_k8s}|g' k8s-deployment.yml"
 
                         // Apply the updated manifest to the Kubernetes cluster
-                        sh 'kubectl apply -f simple-app/k8s-deployment.yml'
+                        sh 'kubectl apply -f k8s-deployment.yml'
                     }
                 }
             }
