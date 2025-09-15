@@ -49,7 +49,7 @@ pipeline {
                     sh "sed -i '' 's|DOCKER_IMAGE_TAG|simple-app:${env.BUILD_ID}|g' k8s-deployment.yml"
 
                     // Apply the updated manifest to the Kubernetes cluster
-                    sh 'kubectl apply -f k8s-deployment.yml'
+                    sh '/opt/homebrew/bin/kubectl apply -f k8s-deployment.yml'
                 }
             }
         }
