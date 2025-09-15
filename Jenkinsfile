@@ -19,24 +19,23 @@ pipeline {
             }
         }
         stage('Push to ECR') {
-    steps {
-        script {
-            withEnv([
-                "PATH+AWS_CLI=/usr/local/bin",
-                "PATH+DOCKER_BIN=/usr/local/bin"
-            ]) {
-                // Log in to ECR using the AWS CLI
-                sh '/usr/local/bin/aws ecr get-login-password --region ap-south-1 | /usr/local/bin/docker login --username AWS --password-stdin 379632383729.dkr.ecr.ap-south-1.amazonaws.com'
+            steps {
+                script {
+                    // Define ECR variables for readability and reusability
+                    def aws_region = 'ap-south-1'
+                    def ecr_repo_url = '379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo'
+                    def image_tag = "${ecr_repo_url}:${env.BUILD_ID}"
 
-                // Tag the image
-                sh '/usr/local/bin/docker tag simple-app:latest 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo/simple-app:latest'
-                
-                // Push the tagged image to ECR
-                sh '/usr/local/bin/docker push 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo/simple-app:latest'
-            }
-        }
-    }
-}
+                    // Log in to ECR with the credentials from the AWS CLI
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'Jenkins-demo-aws-credentials']]) {
+                        sh "aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${ecr_repo_url}"
+                    }
+
+                    // Tag the image
+                    sh "docker tag simple-app:${env.BUILD_ID} ${image_tag}"
+
+                    // Push the image to ECR
+                    sh "docker push ${image_tag}"
                 }
             }
         }
