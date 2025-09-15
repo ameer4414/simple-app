@@ -5,36 +5,47 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh 'docker build -t simple-app:latest .'
+                    sh "docker build -t simple-app:${env.BUILD_ID} ."
                 }
             }
         }
         stage('Test Application') {
             steps {
                 script {
-                    // You would run automated tests here
-                    // For example: sh 'npm test' or sh 'docker run simple-app:latest'
-                    echo 'Running tests...'
+                    echo 'Running automated tests...'
+                    // This is where you would call your test command, e.g.:
+                    // sh 'npm test'
                 }
             }
         }
         stage('Push to ECR') {
             steps {
                 script {
-                    // Log in to ECR
-                    sh 'aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo'
+                    // Define ECR variables for readability and reusability
+                    def aws_region = 'ap-south-1'
+                    def ecr_repo_url = '379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo'
+                    def image_tag = "${ecr_repo_url}:${env.BUILD_ID}"
 
-                    // Tag the image with a unique ID and push
-                    sh 'docker tag simple-app:latest 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo/simple-app:latest'
-                    sh 'docker push 379632383729.dkr.ecr.ap-south-1.amazonaws.com/jenkins-demo/simple-app:latest'
+                    // Log in to ECR with the credentials from the AWS CLI
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        sh "aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${ecr_repo_url}"
+                    }
+
+                    // Tag the image
+                    sh "docker tag simple-app:${env.BUILD_ID} ${image_tag}"
+
+                    // Push the image to ECR
+                    sh "docker push ${image_tag}"
                 }
             }
         }
         stage('Deploy to Kubernetes') {
             steps {
                 script {
-                    // Use a tool like `kubectl` to deploy
-                    // Update a manifest file with the new image tag and apply it to the cluster
+                    // Update the Kubernetes manifest file
+                    sh "sed -i 's|DOCKER_IMAGE_TAG|simple-app:${env.BUILD_ID}|g' k8s-deployment.yaml"
+
+                    // Apply the updated manifest to the Kubernetes cluster
                     sh 'kubectl apply -f k8s-deployment.yaml'
                 }
             }
